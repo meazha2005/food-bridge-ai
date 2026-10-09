@@ -2,6 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ClimateRiskMapSection from '@/components/landing/ClimateRiskMapSection';
+import FoodDemandPredictionSection from '@/components/landing/FoodDemandPredictionSection';
+import LiveAvailabilityBoardSection from '@/components/landing/LiveAvailabilityBoardSection';
+import MatchingEngineSection from '@/components/landing/MatchingEngineSection';
 import { getPlatformAnalytics } from '@/lib/analytics';
 import {
   Sprout,
@@ -162,6 +166,18 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* 1. Climate Risk and Affected Areas Map */}
+      <ClimateRiskMapSection />
+
+      {/* 2. AI Food Demand & Shortage Prediction */}
+      <FoodDemandPredictionSection />
+
+      {/* 3. Live Food Availability Board */}
+      <LiveAvailabilityBoardSection />
+
+      {/* 4. AI Food Matching & Allocation Engine */}
+      <MatchingEngineSection />
 
       {/* The Food Insecurity & El Niño Crisis Section */}
       <section className="py-16 bg-white border-y border-stone-200">

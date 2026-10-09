@@ -44,6 +44,8 @@ export interface FoodListing {
   id: number;
   supplier_organization_id: number;
   supplier_name?: string;
+  supplier_city?: string;
+  supplier_verification?: string;
   created_by_user_id?: number | null;
   food_name: string;
   category: FoodCategory;

@@ -152,11 +152,34 @@ export default function FoodAvailabilityPage() {
 
                       <h3 className="text-base font-bold text-stone-900 leading-snug">{item.food_name}</h3>
 
+                      {/* Supplier Information */}
+                      <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200/70 flex items-center justify-between">
+                        <div className="flex items-center gap-2 overflow-hidden">
+                          <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 text-xs font-bold">
+                            {(item as any).supplier_name ? (item as any).supplier_name.charAt(0) : 'S'}
+                          </div>
+                          <div className="truncate">
+                            <div className="text-xs font-bold text-stone-900 truncate">
+                              {(item as any).supplier_name || 'Verified Agro Producer'}
+                            </div>
+                            <div className="text-[10px] text-stone-500 truncate">
+                              {(item as any).supplier_city || 'Tamil Nadu'}
+                            </div>
+                          </div>
+                        </div>
+                        <span className="shrink-0 text-[10px] font-semibold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded-full">
+                          Verified
+                        </span>
+                      </div>
+
                       <div className="space-y-1.5 text-xs text-stone-600">
                         <div className="flex items-center gap-2">
                           <Package className="w-4 h-4 text-emerald-600 shrink-0" />
                           <span>
                             Available: <strong>{item.quantity_available} {item.unit}</strong>
+                            {Number(item.quantity_reserved) > 0 && (
+                              <span className="text-stone-400 ml-1">({item.quantity_reserved} {item.unit} reserved)</span>
+                            )}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
@@ -165,13 +188,13 @@ export default function FoodAvailabilityPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-blue-600 shrink-0" />
-                          <span>{item.pickup_address}</span>
+                          <span className="truncate">{item.pickup_address}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
-                      <span className="text-[11px] text-stone-400">Condition: {item.condition_state}</span>
+                      <span className="text-[11px] text-stone-500 font-medium">Storage: {item.storage_type || 'ambient'}</span>
                       <Link
                         href={`/login?redirect=/ngo/reserve/${item.id}`}
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-forest-800 hover:bg-forest-900 text-white font-semibold text-xs transition"

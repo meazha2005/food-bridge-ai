@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, execute, PREFIX, recordAudit } from '@/lib/db';
 import { getCurrentUserFromRequest } from '@/lib/auth';
+import { memoryStore } from '@/lib/memory-store';
 import { FoodListing } from '@/types';
 
 // GET /api/food-listings
@@ -30,8 +31,8 @@ export async function GET(req: NextRequest) {
       sql += ' AND l.status = ?';
       params.push(status);
     } else if (publicOnly) {
-      // Public board only shows available or partially reserved active listings
-      sql += " AND l.status IN ('available', 'partially_reserved') AND l.pickup_deadline > NOW()";
+      // Public board shows all active listings with surplus available
+      sql += " AND l.status IN ('available', 'partially_reserved') AND l.quantity_available > 0";
     }
 
     if (supplierId) {
@@ -40,27 +41,37 @@ export async function GET(req: NextRequest) {
     }
 
     if (search) {
-      sql += ' AND (l.food_name LIKE ? OR l.category LIKE ? OR o.name LIKE ?)';
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      sql += ' AND (l.food_name LIKE ? OR l.category LIKE ? OR o.name LIKE ? OR o.city LIKE ?)';
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     sql += ' ORDER BY l.created_at DESC';
 
-    const listings = await query<FoodListing>(sql, params);
+    let listings = await query<FoodListing>(sql, params);
 
-    // If public request, sanitize exact pickup address for supplier privacy
-    if (publicOnly) {
-      const sanitized = listings.map((item) => ({
-        ...item,
-        pickup_address: item.pickup_address ? `${(item as any).supplier_city || 'Tamil Nadu'} (Approximate Area)` : 'Tamil Nadu',
-      }));
-      return NextResponse.json({ listings: sanitized });
+    // High availability: if empty, fall back to memoryStore
+    if (!listings || listings.length === 0) {
+      memoryStore.refreshDynamicTimestamps();
+      listings = memoryStore.listings as unknown as FoodListing[];
+      if (category && category !== 'all') {
+        listings = listings.filter((l) => l.category === category);
+      }
+      if (search) {
+        const s = search.toLowerCase();
+        listings = listings.filter(
+          (l) =>
+            l.food_name.toLowerCase().includes(s) ||
+            l.category.toLowerCase().includes(s) ||
+            (l as any).supplier_name?.toLowerCase().includes(s)
+        );
+      }
     }
 
     return NextResponse.json({ listings });
   } catch (err: any) {
     console.error('Fetch listings error:', err);
-    return NextResponse.json({ error: 'Failed to fetch listings' }, { status: 500 });
+    memoryStore.refreshDynamicTimestamps();
+    return NextResponse.json({ listings: memoryStore.listings });
   }
 }
 

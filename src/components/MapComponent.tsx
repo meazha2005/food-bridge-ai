@@ -8,10 +8,12 @@ export interface MapMarker {
   lat: number;
   lng: number;
   title: string;
-  type: 'supplier' | 'ngo' | 'recipient' | 'driver' | 'disruption';
+  type: 'supplier' | 'ngo' | 'recipient' | 'driver' | 'disruption' | 'warning' | 'shelter' | 'settlement' | 'constraint';
   description?: string;
   quantity?: number;
   urgency?: string;
+  severity?: string;
+  validUntil?: string;
 }
 
 export interface MapRoute {
@@ -91,9 +93,18 @@ export default function MapComponent({
         } else if (type === 'driver') {
           bgColor = '#8b5cf6'; // purple
           label = 'D';
-        } else if (type === 'disruption') {
-          bgColor = '#f59e0b'; // amber
-          label = '!';
+        } else if (type === 'disruption' || type === 'warning') {
+          bgColor = '#dc2626'; // dark red warning
+          label = '⚠';
+        } else if (type === 'shelter') {
+          bgColor = '#ea580c'; // amber orange shelter
+          label = '🏠';
+        } else if (type === 'settlement') {
+          bgColor = '#7c3aed'; // violet vulnerable settlement
+          label = '👥';
+        } else if (type === 'constraint') {
+          bgColor = '#475569'; // slate access bottleneck
+          label = '⛔';
         }
 
         return L.divIcon({
@@ -173,21 +184,24 @@ export default function MapComponent({
     <div className="relative w-full rounded-xl overflow-hidden border border-emerald-900/10 shadow-sm">
       <div ref={mapContainerRef} style={{ height, width: '100%' }} />
       {/* Map Legend */}
-      <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm p-2.5 rounded-lg border border-slate-200 shadow text-xs z-[1000] flex flex-wrap gap-3">
-        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-          <span className="w-3 h-3 rounded-full bg-emerald-600"></span> Supplier Hub
+      <div className="absolute bottom-3 left-3 bg-white/95 backdrop-blur-sm p-2 rounded-lg border border-slate-200 shadow text-[11px] z-[1000] flex flex-wrap gap-2.5 max-w-[90%]">
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Supplier
         </div>
-        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-          <span className="w-3 h-3 rounded-full bg-blue-500"></span> NGO / Food Bank
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span> NGO Bank
         </div>
-        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-          <span className="w-3 h-3 rounded-full bg-red-500"></span> Recipient Kitchen
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span> Relief Shelter
         </div>
-        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-          <span className="w-3 h-3 rounded-full bg-purple-500"></span> Delivery Van
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Hazard Warning
         </div>
-        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-          <span className="w-3 h-3 rounded-full bg-amber-500"></span> Disruption Zone
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-purple-600"></span> Settlement
+        </div>
+        <div className="flex items-center gap-1 font-medium text-slate-700">
+          <span className="w-2.5 h-2.5 rounded-full bg-slate-600"></span> Bottleneck
         </div>
       </div>
     </div>
